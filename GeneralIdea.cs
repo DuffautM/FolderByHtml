@@ -1,41 +1,59 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using HtmlAgilityPack;
  
-public class Downloader
+namespace Perso
 {
-	string path = @"D:\";
+    public class Downloader
+    {
+        string path = @"D:\";
+        int count = 0;
+        int nbr = 0;
  
-	public Downloader()
-	{
-	}
+        public Downloader()
+        {
+        }
  
-  public void throughFiles()
-  {
-  	DirectoryInfo dir = new DirectoryInfo(path);
-  	int nbr = Directory.EnumerateDirectories(path);
-  	int count = 0;
+        public void throughFiles()
+        {
+            DirectoryInfo dir = new DirectoryInfo(path);
+            nbr = dir.GetFiles().Length;
  
-  	foreach (FileInfo file in dir)
-  	{
-      	string nameOfFile = file.Name;
-     	 var url = "https:website.com/id/" + nameOfFile;
-      	var web = new HtmlWeb();
-      	var doc = web.Load(url);
+            foreach (FileInfo file in dir.GetFiles())
+            {
+                string nameOfFile = file.Name;
+                var url = "https:website.com/id/" + nameOfFile;
+                var web = new HtmlWeb();
+                var doc = web.Load(url);
  
-      	string value = doc.DocumentNode.SelectNodes(@"/div/div/tag").First().Attributes["name_tag"].Value;
+                string value = doc.DocumentNode.SelectNodes(@"/div/div/tag").First().Attributes["name_tag"].Value;
  
-      	moveToNewDirectory(value);
-            
-  	}
-  }
+                moveToNewDirectory(file, value);
  
-	public void moveToNewDirectory(string value)
-	{
-    	using (DirectoryInfo dr = new DirectoryInfo())
-    	{
-        	dr.Create(path + "\\" + value);
-        	file.MoveTo(dr.Path);
-    	}
-    	Console.WriteLine(((((count++) / nbr) * 100)) + "%");
-	}
+            }
+        }
+ 
+        public void moveToNewDirectory(FileInfo file, string value)
+        {
+            DirectoryInfo dr = new DirectoryInfo(path);
+            string newPath = path + "/" + value;
+ 
+            try
+            {
+                dr.CreateSubdirectory(newPath);
+                file.MoveTo(dr.FullName);
+            }
+            catch
+            {
+                Console.WriteLine("Error with the file : " + file + " for the folder : " + newPath);
+            }
+ 
+            Console.WriteLine(((((count++) / nbr) * 100)) + "%");
+        }
+    }
+ 
 }
